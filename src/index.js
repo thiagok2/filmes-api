@@ -9,7 +9,7 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 
 app.get('/', (req, res) => {
-	res.json({ status: 'ok', message: 'Hello from Express API (ESM)' });
+	res.json({ status: 'ok', message: 'API OK' });
 });
 
 app.use('/api/filmes', filmesRouter);
