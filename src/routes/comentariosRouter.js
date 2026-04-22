@@ -31,6 +31,9 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const data = req.body || {};
+    // validation: require filme_id and perfil_id
+    if (!data.filme_id) return res.status(400).json({ error: 'filme_id é obrigatório' });
+    if (!data.perfil_id) return res.status(400).json({ error: 'perfil_id é obrigatório' });
     const created = await Comentario.create(data);
     res.status(201).json(created);
   } catch (err) {

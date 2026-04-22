@@ -24,4 +24,4 @@ com base nas tabelas cria na pasta models as entidades do projeto(filme, comenta
 
 3. Adionando testes de banco/models. Criar duas classes de testCases. A primeira mais simples e outra centrada nos relacionamentos.
 
-4. Alterar as rotas
+4. Vamos atualizar a camada de rotas para usara os models para realizar as operações de consulta, criação, atualizacao e deleção. Criar tb consultas onde traga os relacionamentos completos, por exemplo, ao buscar um filme, recuperar todos os seus comentarios e curtidas. Ao buscar um usuario, trazer todos os seus perfis e etc.

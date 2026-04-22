@@ -6,6 +6,8 @@ dotenv.config();
 import filmesRouter from './routes/filmesRouter.js';
 import favoritosRouter from './routes/favoritosRouter.js';
 import comentariosRouter from './routes/comentariosRouter.js';
+import usuariosRouter from './routes/usuariosRouter.js';
+import perfisRouter from './routes/perfisRouter.js';
 
 const app = express();
 const port = process.env.PORT;
@@ -19,6 +21,8 @@ app.get('/', (req, res) => {
 app.use('/api/filmes', filmesRouter);
 app.use('/api/favoritos', favoritosRouter);
 app.use('/api/comentarios', comentariosRouter);
+app.use('/api/usuarios', usuariosRouter);
+app.use('/api/perfis', perfisRouter);
 
 // 404
 app.use((req, res) => {
