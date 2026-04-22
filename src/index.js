@@ -39,22 +39,26 @@ app.use((err, req, res, next) => {
 // 	dialect: 'postgres',
 // 	logging: false
 // });
-
 async function init() {
 	try {
 		await sequelize.authenticate();
 		console.log('Conexão com Postgres estabelecida com sucesso.');
 
-		app.listen(port, () => {
-			console.log(`Servidor ouvindo na porta ${port}`);
-		});
+		if (process.env.NODE_ENV !== 'test') {
+			app.listen(port, () => {
+				console.log(`Servidor ouvindo na porta ${port}`);
+			});
+		}
 	} catch (err) {
 		console.error('Não foi possível conectar ao banco de dados:', err);
 		process.exit(1);
 	}
 }
 
-// Inicia tudo
-init();
+// Só inicia automaticamente quando não estivermos em ambiente de teste
+if (process.env.NODE_ENV !== 'test') {
+	init();
+}
 
 export { sequelize };
+export default app;
