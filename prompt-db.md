@@ -3,5 +3,6 @@ Vamos agora adicionar a camada de persistencia com uso do mysql e sequelize. Vam
 
 1. instalar libs: postgres, sequelize e criar o teste de conexao do index.js.
 
+npm install dotenv express pg pg-hstore sequelize
 
 2. quero fazer os models com sequelize: filme, comentarios, usuario, perfil, playlist, conforme o todo.sql.
