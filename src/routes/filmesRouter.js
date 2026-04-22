@@ -1,54 +1,78 @@
 import express from 'express';
+import { Filme, Comentario } from '../models/index.js';
 
 const router = express.Router();
 
-let filmes = [
-  { id: 1, titulo: 'Desligue!', pais: 'Coréia do Sul', produtora: { nome: 'universal' } },
-  { id: 2, titulo: 'Outro Filme', pais: 'Brasil', produtora: { nome: 'indie' } }
-];
-let nextId = filmes.length + 1;
-
-// GET /api/filmes - all
-router.get('/', (req, res) => {
-  res.json(filmes);
+// GET /api/filmes - list all filmes (optionally include counts)
+router.get('/', async (req, res) => {
+  try {
+    const filmes = await Filme.findAll({
+      attributes: ['id', 'titulo', 'data_lancamento', 'tipo', 'nota_avaliacao']
+    });
+    res.json(filmes);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao buscar filmes' });
+  }
 });
 
-// GET /api/filmes/:id
-router.get('/:id', (req, res) => {
+// GET /api/filmes/:id - get film with its comments and curtidas (profiles who liked)
+router.get('/:id', async (req, res) => {
   const id = Number(req.params.id);
-  const item = filmes.find(f => f.id === id);
-  if (!item) return res.status(404).json({ error: 'Filme não encontrado' });
-  res.json(item);
+  try {
+    const filme = await Filme.findByPk(id, {
+      include: [
+        { model: Comentario, as: 'comentarios' },
+        // include profiles that liked the film via the many-to-many association
+        { association: 'recebeu_curtidas', through: { attributes: ['data_curtida'] } }
+      ]
+    });
+    if (!filme) return res.status(404).json({ error: 'Filme não encontrado' });
+    res.json(filme);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao buscar filme' });
+  }
 });
 
-// POST /api/filmes
-router.post('/', (req, res) => {
-  const body = req.body || {};
-
-  const newItem = { id: nextId++, ...body };
-
-  filmes.push(newItem);
-  res.status(201).json(newItem);
+// POST /api/filmes - create
+router.post('/', async (req, res) => {
+  try {
+    const data = req.body || {};
+    const novo = await Filme.create(data);
+    res.status(201).json(novo);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao criar filme' });
+  }
 });
 
-// PUT /api/filmes/:id
-router.put('/:id', (req, res) => {
+// PUT /api/filmes/:id - update
+router.put('/:id', async (req, res) => {
   const id = Number(req.params.id);
-  const idx = filmes.findIndex(f => f.id === id);
-  if (idx === -1) return res.status(404).json({ error: 'Filme não encontrado' });
-  filmes[idx] = { id, ...filmes[idx], ...req.body };
-
-  console.log(filmes[idx]);
-  res.json(filmes[idx]);
+  try {
+    const filme = await Filme.findByPk(id);
+    if (!filme) return res.status(404).json({ error: 'Filme não encontrado' });
+    await filme.update(req.body || {});
+    res.json(filme);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao atualizar filme' });
+  }
 });
 
 // DELETE /api/filmes/:id
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   const id = Number(req.params.id);
-  const idx = filmes.findIndex(f => f.id === id);
-  if (idx === -1) return res.status(404).json({ error: 'Filme não encontrado' });
-  const removed = filmes.splice(idx, 1)[0];
-  res.json(removed);
+  try {
+    const filme = await Filme.findByPk(id);
+    if (!filme) return res.status(404).json({ error: 'Filme não encontrado' });
+    await filme.destroy();
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao deletar filme' });
+  }
 });
 
 export default router;

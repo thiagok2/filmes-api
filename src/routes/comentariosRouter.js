@@ -1,49 +1,70 @@
 import express from 'express';
+import { Comentario, Filme, Perfil } from '../models/index.js';
 
 const router = express.Router();
 
-let comentarios = [
-  { id: 1, filmeId: 1, autor: 'Ana', texto: 'Ótimo filme!' }
-];
-let nextId = comentarios.length + 1;
-
-// GET all
-router.get('/', (req, res) => {
-  res.json(comentarios);
+// GET all comments
+router.get('/', async (req, res) => {
+  try {
+    const list = await Comentario.findAll({ include: [{ model: Filme, as: 'filme' }, { model: Perfil, as: 'perfil' }] });
+    res.json(list);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao buscar comentários' });
+  }
 });
 
 // GET by id
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
   const id = Number(req.params.id);
-  const item = comentarios.find(c => c.id === id);
-  if (!item) return res.status(404).json({ error: 'Comentário não encontrado' });
-  res.json(item);
+  try {
+    const item = await Comentario.findByPk(id, { include: [{ model: Filme, as: 'filme' }, { model: Perfil, as: 'perfil' }] });
+    if (!item) return res.status(404).json({ error: 'Comentário não encontrado' });
+    res.json(item);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao buscar comentário' });
+  }
 });
 
 // POST
-router.post('/', (req, res) => {
-  const body = req.body || {};
-  const newItem = { id: nextId++, ...body };
-  comentarios.push(newItem);
-  res.status(201).json(newItem);
+router.post('/', async (req, res) => {
+  try {
+    const data = req.body || {};
+    const created = await Comentario.create(data);
+    res.status(201).json(created);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao criar comentário' });
+  }
 });
 
 // PUT
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
   const id = Number(req.params.id);
-  const idx = comentarios.findIndex(c => c.id === id);
-  if (idx === -1) return res.status(404).json({ error: 'Comentário não encontrado' });
-  comentarios[idx] = { id, ...req.body };
-  res.json(comentarios[idx]);
+  try {
+    const item = await Comentario.findByPk(id);
+    if (!item) return res.status(404).json({ error: 'Comentário não encontrado' });
+    await item.update(req.body || {});
+    res.json(item);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao atualizar comentário' });
+  }
 });
 
 // DELETE
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   const id = Number(req.params.id);
-  const idx = comentarios.findIndex(c => c.id === id);
-  if (idx === -1) return res.status(404).json({ error: 'Comentário não encontrado' });
-  const removed = comentarios.splice(idx, 1)[0];
-  res.json(removed);
+  try {
+    const item = await Comentario.findByPk(id);
+    if (!item) return res.status(404).json({ error: 'Comentário não encontrado' });
+    await item.destroy();
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao deletar comentário' });
+  }
 });
 
 export default router;

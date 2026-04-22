@@ -1,49 +1,70 @@
 import express from 'express';
+import { PlaylistFilme, Filme, Perfil } from '../models/index.js';
 
 const router = express.Router();
 
-let favoritos = [
-  { id: 1, user: 'thiago', filmeId: 1 }
-];
-let nextId = favoritos.length + 1;
-
-// GET all
-router.get('/', (req, res) => {
-  res.json(favoritos);
+// GET all favoritos (playlist entries)
+router.get('/', async (req, res) => {
+  try {
+    const list = await PlaylistFilme.findAll({ include: [{ model: Filme }, { model: Perfil }] });
+    res.json(list);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao buscar favoritos' });
+  }
 });
 
 // GET by id
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
   const id = Number(req.params.id);
-  const item = favoritos.find(f => f.id === id);
-  if (!item) return res.status(404).json({ error: 'Favorito não encontrado' });
-  res.json(item);
+  try {
+    const item = await PlaylistFilme.findByPk(id, { include: [Filme, Perfil] });
+    if (!item) return res.status(404).json({ error: 'Favorito não encontrado' });
+    res.json(item);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao buscar favorito' });
+  }
 });
 
-// POST
-router.post('/', (req, res) => {
-  const body = req.body || {};
-  const newItem = { id: nextId++, ...body };
-  favoritos.push(newItem);
-  res.status(201).json(newItem);
+// POST create favorito (playlist entry)
+router.post('/', async (req, res) => {
+  try {
+    const data = req.body || {};
+    const created = await PlaylistFilme.create(data);
+    res.status(201).json(created);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao criar favorito' });
+  }
 });
 
-// PUT
-router.put('/:id', (req, res) => {
+// PUT update
+router.put('/:id', async (req, res) => {
   const id = Number(req.params.id);
-  const idx = favoritos.findIndex(f => f.id === id);
-  if (idx === -1) return res.status(404).json({ error: 'Favorito não encontrado' });
-  favoritos[idx] = { id, ...req.body };
-  res.json(favoritos[idx]);
+  try {
+    const item = await PlaylistFilme.findByPk(id);
+    if (!item) return res.status(404).json({ error: 'Favorito não encontrado' });
+    await item.update(req.body || {});
+    res.json(item);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao atualizar favorito' });
+  }
 });
 
 // DELETE
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   const id = Number(req.params.id);
-  const idx = favoritos.findIndex(f => f.id === id);
-  if (idx === -1) return res.status(404).json({ error: 'Favorito não encontrado' });
-  const removed = favoritos.splice(idx, 1)[0];
-  res.json(removed);
+  try {
+    const item = await PlaylistFilme.findByPk(id);
+    if (!item) return res.status(404).json({ error: 'Favorito não encontrado' });
+    await item.destroy();
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao deletar favorito' });
+  }
 });
 
 export default router;

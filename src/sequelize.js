@@ -1,4 +1,7 @@
 import { Sequelize } from 'sequelize';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 // Create a Sequelize instance based on DATABASE_URL.
 // In test environment default to sqlite in-memory for fast, isolated tests.
