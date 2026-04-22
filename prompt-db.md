@@ -19,3 +19,9 @@ NODE_ENV=development
 
 
 2. quero fazer os models com sequelize: filme, comentarios, usuario, perfil, playlist, conforme o todo.sql.
+
+com base nas tabelas cria na pasta models as entidades do projeto(filme, comentario, playlist, usuario, perfil) e seus relacionamentos.
+
+3. Adionando testes de banco/models. Criar duas classes de testCases. A primeira mais simples e outra centrada nos relacionamentos.
+
+4. Alterar as rotas

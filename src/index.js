@@ -1,6 +1,6 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import { Sequelize } from 'sequelize';
+import sequelize from './sequelize.js';
 
 dotenv.config();
 import filmesRouter from './routes/filmesRouter.js';
@@ -31,10 +31,10 @@ app.use((err, req, res, next) => {
 	res.status(500).json({ error: 'Internal Server Error' });
 });
 
-const sequelize = new Sequelize(process.env.DATABASE_URL, {
-	dialect: 'postgres',
-	logging: false
-});
+// const sequelize = new Sequelize(process.env.DATABASE_URL, {
+// 	dialect: 'postgres',
+// 	logging: false
+// });
 
 async function init() {
 	try {
